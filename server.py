@@ -61,20 +61,15 @@ class ClientConnection:
 
     def listen(self):
 
-#user and channel management
-#functions that the class functions reference
-def add_client():
+    def add_client(self):
 
-def remove_client():
+    def remove_client(self):
 
-def connect():
-    
-def disconnect():
+    def message(self): #for channel and private messages
 
-def message():
+    #Need a message handling section. Use regex. look at miniircd server source code. 
 
-
-#Need a message handling section. Use regex. look at miniircd server source code. 
+    def messageParser(self):
 
 
 def main():
