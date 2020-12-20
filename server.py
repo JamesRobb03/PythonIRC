@@ -45,18 +45,16 @@ class IRC_Server:
         #we decided to switch to the select module.
         server_sock.setblocking(False)
         connection_li.append(server_sock)
-        while True: #infinite loop
+        while True:
             read_ready, _, _ = select.select(connection_li, [], [], None)
-            for connection in read_ready:#loops through all active connections and processes there requests/adds new connection.
+            for connection in read_ready:
                 if connection == server_socket: #If has the same socket as the server then open a new connection
                     #function to add a connection
                 else:
-                    #function to service a connection
+                    #function 
 
-    def acceptConnection(self, server_socket):
-        client_socket, client_address = server_socket.accept()
+    
 
-    def serviceConnection(self)
 #Class for the client connection
 class ClientConnection:
     def __init__(self, connection, address):
@@ -77,6 +75,9 @@ class ClientConnection:
     def listen(self):
 
     def add_client(self):
+        connection_li.append(self.connection)
+        client_li.append(self)
+        
 
     def remove_client(self):
 
