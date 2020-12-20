@@ -13,7 +13,7 @@ address = 'localhost' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
-channel_li = []
+channel_li = {}
 connection_li = []
 
 class IRC_Server:
@@ -69,7 +69,12 @@ class ClientConnection:
     def receive(self):
 
     def connect(self, channel):
+        if channel in channels_li.keys():
+            channels_lis[channel].append(self)
+        for i in channels_li[channel]:
+            i.send("{0} has entered {1}".format(self.nick,channel))
         
+            
     def disconnect(self, channel):
 
     def listen(self):
