@@ -5,16 +5,16 @@
 
 #imports
 import socket  
-import select  
+import select 
 import sys  
-from thread import *
+
 #Server Section
 address = 'localhost' #change to address of host pc
 port = 6667 #default port for irc
-#global dictionaries for easy reference.
-user_dict = {}
-channel_dict = {}
-coonection_dict = {}
+#global lists/dictionaries for easy reference.
+client_li = []
+channel_li = []
+connection_li = []
 
 class IRC_Server:
     def __init__(self, host, port):
@@ -27,19 +27,32 @@ class IRC_Server:
 
     #start socket
     def startServer(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #change for ipv6 to AF_INET6
+        sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) #change for ipv6 to AF_INET6
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host,self.port))
+        print("Server started!")
         return sock
 
     #Listen and create a new connection to the server
     def listenForConnection(self, server_socket):
+        #setting up selector
         server_sock.listen()
-        print("Listening for connections")
+        print("Listening for connections on ", address,":",str(port))
+        #was using threading, however after reading these: https://realpython.com/python-sockets/#handling-multiple-connections 
+        #https://www.oreilly.com/library/view/python-standard-library/0596000960/ch07s03.html
+        #https://stackoverflow.com/questions/20471816/how-does-the-select-function-in-the-select-module-of-python-exactly-work
+        #https://www.programcreek.com/python/example/258/select.select
+        #we decided to switch to the select module.
+        server_sock.setblocking(False)
+        connection_li.append(server_sock)
         while True:
-            connection, user_address = sock.accept()
-            new_client = ClientConnection(connection, user_address)#will reference user class!
-            threading.Thread(target=ClientConnection.listen).start()
+            read_ready, _, _ = select.select(connection_li, [], [], None)
+            for connection in read_ready:
+                if connection == server_socket: #If has the same socket as the server then open a new connection
+                    #function to add a connection
+                else:
+                    #function 
+
     
 
 #Class for the client connection
@@ -67,8 +80,7 @@ class ClientConnection:
 
     def message(self): #for channel and private messages
 
-    #Need a message handling section. Use regex. look at miniircd server source code. 
-
+    #Need a message handling section. 
     def messageParser(self):
 
 
