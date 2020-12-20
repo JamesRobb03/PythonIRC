@@ -14,7 +14,7 @@ address = 'localhost' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
-channel_li = []
+channel_li = {}
 connection_li = []
 
 #TO-DO: add try/except. error handler which drops connections
@@ -78,22 +78,33 @@ class ClientConnection:
         self.nickname = ""
         self.user = ""
         self.realname = ""
-
+        
+    #need setters for attributes
+    #need to add extra steps in (curretnly just base functionality)
+    #   inlcuding input and all that jazz
     def send(self, message):
         
     def receive(self):
 
     def connect(self, channel):
+        if channel in channel_li.keys():
+            channel_lis[channel].append(self)
+        for i in channel_li[channel]:
+            i.send("{0} has entered {1}".format(self.nick,channel))
         
     def disconnect(self, channel):
-
-    def listen(self):
+        connection_li.remove(self.socket)
+        client_li.remove(self)
 
     def add_client(self):
+        connection_li.append(self.connection)
+        client_li.append(self)
 
     def remove_client(self):
+        channel_li[channel].remove(self)
 
     def message(self): #for channel and private messages
+        self.connection.sendall(message)
 
     #Need a message handling section. 
     def messageParser(self, message):
