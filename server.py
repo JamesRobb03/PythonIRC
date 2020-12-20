@@ -17,6 +17,7 @@ client_li = []
 channel_li = []
 connection_li = []
 
+#TO-DO: add try/except. error handler which drops connections
 class IRC_Server:
     def __init__(self, host, port):
         self.host = host
@@ -54,6 +55,7 @@ class IRC_Server:
                     #function to add a connection
                     acceptConnection(server_sock)
                 else:
+                    #function which handles servicing client connections. 
                     serviceConnection()
 
     def acceptConnection(self, server_socket):
@@ -94,7 +96,7 @@ class ClientConnection:
     def message(self): #for channel and private messages
 
     #Need a message handling section. 
-    def messageParser(self):
+    def messageParser(self, message):
 
 
 def main():
