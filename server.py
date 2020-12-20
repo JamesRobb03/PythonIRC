@@ -64,6 +64,10 @@ class ClientConnection:
         self.user = ""
         self.realname = ""
 
+#need setters for attributes
+#need to add extra steps in (curretnly just base functionality)
+#   inlcuding input and all that jazz
+
     def send(self, message):
         
     def receive(self):
@@ -91,6 +95,7 @@ class ClientConnection:
         
 
     def message(self): #for channel and private messages
+        self.connection.sendall(message)
 
     #Need a message handling section. 
     def messageParser(self):
