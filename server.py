@@ -69,14 +69,16 @@ class ClientConnection:
     def receive(self):
 
     def connect(self, channel):
-        if channel in channels_li.keys():
-            channels_lis[channel].append(self)
-        for i in channels_li[channel]:
+        if channel in channel_li.keys():
+            channel_lis[channel].append(self)
+        for i in channel_li[channel]:
             i.send("{0} has entered {1}".format(self.nick,channel))
         
             
     def disconnect(self, channel):
-
+        connection_li.remove(self.socket)
+        client_li.remove(self)
+        
     def listen(self):
 
     def add_client(self):
@@ -84,7 +86,9 @@ class ClientConnection:
         client_li.append(self)
         
 
-    def remove_client(self):
+    def remove_client(self,channel):
+        channel_li[channel].remove(self)
+        
 
     def message(self): #for channel and private messages
 
