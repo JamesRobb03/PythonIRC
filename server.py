@@ -17,19 +17,6 @@ client_li = []
 channel_li = {}
 connection_li = []
 
-#Found this on a github repo for a python irc server (same assignment for this module but from last year)
-#have to reference!!!
-#https://github.com/CharlieHewitt/AC31008-Networks/blob/master/server.py 
-ircCommands = {}
-ircCommands['user'] = r'USER\s(.*)\s(.*)\s(.*)\s:(.*)'
-ircCommands['nick'] = r'NICK\s(.*)'
-ircCommands['privmsg'] = r'PRIVMSG\s(.*)\s:(.*)'
-ircCommands['join'] = r'JOIN\s(.*)'
-ircCommands['part'] = r'PART\s(.*) (:.*)'
-ircCommands['who'] = r'WHO\s(.*)'
-ircCommands['ping'] = r'PING\s(.*)'
-ircCommands['quit'] = r'QUIT\s(.*)'
-
 
 #TO-DO: add try/except. error handler which drops connections
 class IRC_Server:
@@ -66,14 +53,14 @@ class IRC_Server:
             for connection in read_ready:#loops through all active connections and processes there requests/adds new connection.
                 if connection == server_sock: #If has the same socket as the server then open a new connection
                     #function to add a connection
-                    acceptConnection(server_sock)
+                    self.acceptConnection(server_sock)
                 else:
                     #function which handles servicing client connections. 
-                    serviceConnection(connection)
+                    self.serviceConnection(connection)
 
     def acceptConnection(self, server_socket):
         client_socket, client_address = server_socket.accept()
-        new_client = Client(client_socket, client_address)
+        new_client = ClientConnection(client_socket, client_address)
         new_client.add_client()
 
     def serviceConnection(self, connectionSocket):
@@ -96,9 +83,9 @@ class ClientConnection:
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
 
-    def setNickname(self, nickname):#NICK
+    def setNickname(self, groups):#NICK
         try:
-            if self.nick != "":
+            if self.nickname == "":
                 self.nickname = groups[0]
 
             if self.user != "" and self.nickname == "":
@@ -107,7 +94,8 @@ class ClientConnection:
                     self.nickname = ""
                     print("Connection rejected.")
                     return False
-                else
+                else:
+                    print("THE THING")
                     #Print the thing
             return #idk
 
@@ -129,7 +117,8 @@ class ClientConnection:
                     self.nickname = ""
                     print("Connection rejected.")
                     return False
-                else
+                else:
+                    print("THE THING")
                     #print the thing
             return #idk
 
@@ -151,7 +140,7 @@ class ClientConnection:
         connection_li.append(self.connection)
         client_li.append(self)
 
-    def get_client(self, socket): #function which returns the right connection for serviceConnections()
+    def get_client(socket): #function which returns the right connection for serviceConnections()
         for client in client_li:
             if client.connection == socket:
                 return client
@@ -170,32 +159,46 @@ class ClientConnection:
 
     #Need a message handling section. 
     def messageParser(self, data): #data is the data passed in from serviceconnection
+        #Found this on a github repo for a python irc server (same assignment for this module but from last year)
+        #have to reference!!!
+        #https://github.com/CharlieHewitt/AC31008-Networks/blob/master/server.py 
+        ircCommands = {
+            'user': r'USER\s(.*)\s(.*)\s(.*)\s:(.*)',
+            'nick': r'NICK\s(.*)',
+            'privmsg': r'PRIVMSG\s(.*)\s:(.*)',
+            'join': r'JOIN\s(.*)',
+            'part': r'PART\s(.*) (:.*)',
+            'who': r'WHO\s(.*)',
+            'ping': r'PING\s(.*)',
+            'quit': r'QUIT\s(.*)'
+        }
+
         message = data.split('\r\n')
         for m in message:
             for irc in ircCommands:
-                command = re.search(ircCommands[irc], m) #https://docs.python.org/3/library/re.html
-                if(command):#if there is a matching irc command
-                    groups=command.groups() #https://www.tutorialspoint.com/What-is-the-groups-method-in-regular-expressions-in-Python
-                    if(command == 'user'):
-                        setUser()
-                    elif(command == 'nick'):
-                        setNickname()
-                    elif(command == 'privmsg'):
+                match = re.search(ircCommands[irc], m) #https://docs.python.org/3/library/re.html
+                if(match):#if there is a matching irc command
+                    groups=match.groups() #https://www.tutorialspoint.com/What-is-the-groups-method-in-regular-expressions-in-Python
+                    if(irc == 'user'):
+                        self.setUser(groups)
+                    elif(irc == 'nick'):
+                        self.setNickname(groups)
+                    elif(irc == 'privmsg'):
                         #run send
                         print("privmsg")
-                    elif(command == 'join'):
+                    elif(irc == 'join'):
                         #run connect to channel
                         print("join")
-                    elif(command == 'part'):
+                    elif(irc == 'part'):
                         #run disconnect
                         print("part")
-                    elif(command == 'who'):
+                    elif(irc == 'who'):
                         #run who
                         print("who")
-                    elif(command == 'ping'):
+                    elif(irc == 'ping'):
                         #run ping
                         print("ping")
-                    elif(command == 'quit'):
+                    elif(irc == 'quit'):
                         #run remove_client
                         print("quit")
                     else:
