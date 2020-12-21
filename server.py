@@ -10,7 +10,7 @@ import sys
 import string 
 import re
 #Server Section
-address = 'localhost' #change to address of host pc
+address = '::1' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
@@ -50,10 +50,10 @@ class IRC_Server:
         return sock
 
     #Listen and create a new connection to the server
-    def listenForConnection(self, server_socket):
+    def listenForConnection(self, server_sock):
         #setting up selector
         server_sock.listen()
-        print("Listening for connections on ", address,":",str(port))
+        print("Listening for connections on", address,":",str(port))
         #was using threading, however after reading these: https://realpython.com/python-sockets/#handling-multiple-connections
         #reading on select 
         #https://stackoverflow.com/questions/20471816/how-does-the-select-function-in-the-select-module-of-python-exactly-work
@@ -95,6 +95,7 @@ class ClientConnection:
     #need setters for attributes
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
+
     def setNickname(self, nickname):#NICK
         try:
             if self.nick != "":
@@ -136,7 +137,7 @@ class ClientConnection:
             origin.handleException(e)
 
     def send(self, message): #for channel and private messages PRIVMSG
-
+        return
     def connectToChannel(self, channel): #JOIN
         if channel in channel_li.keys():
             channel_lis[channel].append(self)
@@ -156,9 +157,9 @@ class ClientConnection:
                 return client
 
     def who(self): #WHO
-
+        return
     def ping(self):#PING
-
+        return
     def remove_client(self): #QUIT
         connection_li.remove(self.connection)
         client_li.remove(self)
@@ -181,16 +182,22 @@ class ClientConnection:
                         setNickname()
                     elif(command == 'privmsg'):
                         #run send
+                        print("privmsg")
                     elif(command == 'join'):
                         #run connect to channel
+                        print("join")
                     elif(command == 'part'):
                         #run disconnect
+                        print("part")
                     elif(command == 'who'):
                         #run who
+                        print("who")
                     elif(command == 'ping'):
                         #run ping
+                        print("ping")
                     elif(command == 'quit'):
                         #run remove_client
+                        print("quit")
                     else:
                         print("No matching command!")
 

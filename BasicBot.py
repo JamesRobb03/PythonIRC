@@ -2,7 +2,7 @@
 #!/usr/bin/python3
 import socket
 import datetime
-import urllib.request
+import requests
 
 SERVER = "localhost"
 PORT = 6667
@@ -39,42 +39,42 @@ def listen():
 
 		print(buffer)
 
-        def messageRespond(message):
-                #TODO repond to any message e.g. "!hello" "!slap"
-            #TODO swap NICK with username
-                print(message)
+def messageRespond(message):
+    #TODO repond to any message e.g. "!hello" "!slap"
+    #TODO swap NICK with username
 
-        if ("!hello" in message):
-            #Below is to identify username
-            st = ':'
-            ed = '!'
-            un = message [message.find(st)+len(st):message.find(en)]
-
-            #Below responds with Hello and date and time
-            IRCSoc.send("Hello" + un + "My name is BasicBot".encode())
-            date = datetime.datetime.now()
-            IRCSoc.send("The time is: "+ date.strftime("%X").encode())
-
-        elif ("!slap" in message):
+    if ("!hello" in message):
         #Below is to identify username
-            st = ':'
-            ed = '!'
-            un = message [message.find(st)+len(st):message.find(en)]
+        st = ':'
+        ed = '!'
+        un = message [message.find(st)+len(st):message.find(ed)]
 
-            #Below is to respond to a slap.
-            IRCSoc.send("BasicBot slaps" + un + "around a bit with a large trout".encode())
+        #Below responds with Hello and date and time
+        IRCSoc.send(("PRIVMSG #test :Hello" + un + "My name is BasicBot \r\n").encode())
+        date = datetime.datetime.now()
+        IRCSoc.send(("PRIVMSG #test :The time is: "+ date.strftime("%X")+"\r\n").encode())
 
-        #TODO Private Message Response
-        elif ("PRIVMSG" in message):
-            st = ':'
-            ed = '!'
-            un = message [message.find(st)+len(st):message.find(en)]
+    elif ("!slap" in message):
+        #Below is to identify username
+        st = ':'
+        ed = '!'
+        un = message [message.find(st)+len(st):message.find(ed)]
 
-            #respond with a fact
-            res = requests.get('https://uselessfacts.jsph.pl/random.txt?language=en')
-            IRCSoc.send("Hello " + un + " Here is a fact! " + res.encode())
+        #Below is to respond to a slap.
+        IRCSoc.send(("PRIVMSG #test :Slapped " + un + " around a bit with a large trout \r\n").encode())
+
+    #TODO Private Message Response
+    elif ("PRIVMSG Bot" in message or ("PRIVMSG Bot" in message and "!" in message)):
+        st = ':'
+        ed = '!'
+        un = message [message.find(st)+len(st):message.find(ed)]
+
+        #respond with a fact
+        res = requests.get('https://uselessfacts.jsph.pl/random.txt?language=en')
+        IRCSoc.send(("PRIVMSG " + un + " :Here is a fact! " + str(res) + "\r\n").encode())
 
 
 connect()
 login()
 join()
+listen()
