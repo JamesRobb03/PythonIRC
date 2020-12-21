@@ -176,8 +176,19 @@ class ClientConnection:
     def ping(self):#PING
         return
     def remove_client(self): #QUIT
-        connection_li.remove(self.connection)
-        client_li.remove(self)
+        try:
+            
+            raise Exception('quit')
+
+        except (ConnectionResetError, BrokenPipeError, Exception) as e:
+        origin.handleException(e)
+
+    def handleException(self, e):
+        print(e)
+        if self.user != "" and self.nickname != "" and e.__class__.__name__ != 'BrokenPipeError':
+            removeUser(self.nickname)
+            self.conn.close()
+            print('Connection dropped by: ' + str(self.address))
 
     def message(self, message): 
         messageToSend = (":"+message+"\r\n").encode()
