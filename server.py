@@ -96,12 +96,23 @@ class ClientConnection:
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
     def setNickname(self, nickname):#NICK
-        userExists = nicknameAvailable(nickname)
-        if userExists == 1:
-            print("Username already taken")
-            return 0
-        self.nickname = nickname
-        self.send(self.nickname)
+        try:
+            if self.nick != "":
+                self.nickname = groups[0]
+
+            if self.user != "" and self.nickname == "":
+                available = nicknameAvailable(nickname)
+                if available != 0:
+                    self.nickname = ""
+                    print("Connection rejected.")
+                    return False
+                else
+                    #Print the thing
+            return #idk
+
+        except (ConnectionResetError, BrokenPipeError) as e:
+                origin.handleException(e)
+            
 
     def setUser(self, groups):#USER
         try:
@@ -112,13 +123,17 @@ class ClientConnection:
             self.realname = groups[3]
 
             if self.nickname != "":
-                success = ##ADD USER THING
-                if success != True:
+                available = usernameAvailable(user)
+                if available != 0:
                     self.nickname = ""
                     print("Connection rejected.")
                     return False
                 else
                     #print the thing
+            return #idk
+
+        except (ConnectionResetError, BrokenPipeError) as e:
+            origin.handleException(e)
 
     def send(self, message): #for channel and private messages PRIVMSG
 
@@ -163,7 +178,7 @@ class ClientConnection:
                     if(command == 'user'):
                         setUser()
                     elif(command == 'nick'):
-                        #run set nick
+                        setNickname()
                     elif(command == 'privmsg'):
                         #run send
                     elif(command == 'join'):
@@ -182,6 +197,12 @@ class ClientConnection:
     def nicknameAvailable(nickname):
         for user in client_li:
             if user.nickname == nickname:
+                return 1
+            return 0
+
+    def usernameAvailable(user):
+        for users in client_li:
+            if users.user == user:
                 return 1
             return 0
 
