@@ -134,8 +134,21 @@ class ClientConnection:
         self.message(socket.gethostname() + " 002 %s :The host is: " % self.nickname + socket.gethostname() + "Version 1" )
         self.message(socket.gethostname() + " 003 %s :Server was created December 2020" % self.nickname)
 
-    def send(self, message): #for channel and private messages PRIVMSG
-        return
+    def send(self, groups): #for channel and private messages PRIVMSG
+        target = str(groups[0])
+        message = str(groups[1])
+        #to tell its for a channel
+        messageToSend = (self.nickname+'!'+self.user+'@'+socket.gethostname()+' PRIVMSG ' + target +' '+message)
+        if '#' in target:
+            for username in channel_li[target]:
+                    if username != self.user:
+                        connection_di[username].message(messageToSend)
+
+        else:
+            if target in connection_di:
+                connection_di[target].message(messageToSend)
+
+
 
     def connectToChannel(self, channel): #JOIN
 
@@ -144,11 +157,16 @@ class ClientConnection:
                 users[self.user].append(str(channel))
                 channel_li[str(channel)].append(self.user)
                 print(self.user + " Has connected to the channel: " + str(channel))
+                connectingUser = self.user
+                connectingNick = self.nickname
+                self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
                 for username in channel_li[str(channel)]:
                     if username != self.user:
-                        connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
-                self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
-                #now print all names of users in channel
+                        connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
+                    self.message(socket.gethostname() + ' 353 ' + username + '=' + str(channel) + ' :'+username)
+                self.message(socket.gethostname() + ' 366 ' + self.user + ' ' + str(channel) + ' :End of NAMES list')
+                
+
 
             else:
                 self.message(socket.gethostname() + ' 443 ' + self.user + ' ' +
@@ -231,7 +249,6 @@ class ClientConnection:
             'join': r'JOIN\s(.*)',
             'part': r'PART\s(.*) (:.*)',
             'who': r'WHO\s(.*)',
-            'ping': r'PING\s(.*)',
             'quit': r'QUIT\s(.*)'
         }
 
@@ -246,21 +263,16 @@ class ClientConnection:
                     elif(irc == 'nick'):
                         self.setNickname(groups)
                     elif(irc == 'privmsg'):
-                        #run send
+                        self.send(groups)
                         print("privmsg")
                     elif(irc == 'join'):
                         #run connect to channel
                         self.connectToChannel(groups[0])
-                        print("join")
                     elif(irc == 'part'):
-                        #run disconnect
-                        print("part")
+                        self.disconnect(groups)
                     elif(irc == 'who'):
                         #run who
                         print("who")
-                    elif(irc == 'ping'):
-                        #run ping
-                        print("ping")
                     elif(irc == 'quit'):
                         self.remove_client()
                     else:
