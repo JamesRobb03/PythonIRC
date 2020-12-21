@@ -95,7 +95,12 @@ class ClientConnection:
     #need setters for attributes
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
-    def setNickname(self):#NICK
+    def setNickname(self, nickname):#NICK
+        userExists = nicknameAvailable(nickname)
+        if userExists == 1:
+            print("Username already taken")
+            return 0
+        self.nickname = nickname
 
     def setUser(self):#USER
 
@@ -157,6 +162,12 @@ class ClientConnection:
                         #run remove_client
                     else:
                         print("No matching command!")
+
+    def nicknameAvailable(nickname):
+        for user in client_li:
+            if user.nickname == nickname:
+                return 1
+            return 0
 
 #MAIN PROGRAM. RUNS THIS FUNCTION TO START SERVER
 def main():
