@@ -61,23 +61,13 @@ class IRC_Server:
         #decided to switch to the select module instead (might be bad cpu performance will have to check).
         server_sock.setblocking(False)
         connection_li.append(server_sock)
-        while True:
+        while True: #infinite loop
             read_ready, _, _ = select.select(connection_li, [], [], None)
-<<<<<<< HEAD
-            for connection in read_ready:
-                if connection == server_socket: #If has the same socket as the server then open a new connection
-=======
             for connection in read_ready:#loops through all active connections and processes there requests/adds new connection.
                 if connection == server_sock: #If has the same socket as the server then open a new connection
->>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
                     #function to add a connection
                     acceptConnection(server_sock)
                 else:
-<<<<<<< HEAD
-                    #function 
-
-    
-=======
                     #function which handles servicing client connections. 
                     serviceConnection(connection)
 
@@ -92,7 +82,6 @@ class IRC_Server:
         if data:
            data = data.decode()
            client.messageParser(data)
->>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
 
 #Class for the client connection
 class ClientConnection:
@@ -103,17 +92,6 @@ class ClientConnection:
         self.user = ""
         self.realname = ""
 
-<<<<<<< HEAD
-#need setters for attributes
-#need to add extra steps in (curretnly just base functionality)
-#   inlcuding input and all that jazz
-
-    def send(self, message):
-        
-    def receive(self):
-
-    def connect(self, channel):
-=======
     #need setters for attributes
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
@@ -124,32 +102,11 @@ class ClientConnection:
     def send(self, message): #for channel and private messages PRIVMSG
 
     def connectToChannel(self, channel): #JOIN
->>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
         if channel in channel_li.keys():
             channel_lis[channel].append(self)
         for i in channel_li[channel]:
             i.send("{0} has entered {1}".format(self.nick,channel))
         
-<<<<<<< HEAD
-            
-    def disconnect(self, channel):
-        connection_li.remove(self.socket)
-        client_li.remove(self)
-        
-    def listen(self):
-
-    def add_client(self):
-        connection_li.append(self.connection)
-        client_li.append(self)
-        
-
-    def remove_client(self,channel):
-        channel_li[channel].remove(self)
-        
-
-    def message(self): #for channel and private messages
-        self.connection.sendall(message)
-=======
     def disconnect(self, channel): #PART
         channel_li[channel].remove(self)
 
@@ -165,7 +122,6 @@ class ClientConnection:
     def who(self): #WHO
 
     def ping(self):#PING
->>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
 
     def remove_client(self): #QUIT
         connection_li.remove(self.connection)
