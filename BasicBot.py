@@ -72,7 +72,7 @@ def messageRespond(message):
 
         #respond with a fact
         res = requests.get('https://uselessfacts.jsph.pl/random.txt?language=en')
-        IRCSoc.send(("PRIVMSG " + un + " :Here is a fact! " + str(res) + "\r\n").encode())
+        IRCSoc.send(("PRIVMSG " + un + " :Here is a fact! " + str(res.content) + "\r\n").encode())
 
 
 connect()
