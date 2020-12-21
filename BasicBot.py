@@ -4,18 +4,19 @@ import socket
 import datetime
 import requests
 
-SERVER = "localhost"
+SERVER = "::1"
 PORT = 6667
 CHANNEL = "#test"
 
-IRCSoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+IRCSoc = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
 def connect():
 	IRCSoc.connect((SERVER, PORT))
 
 def login():
-    IRCSoc.send("USER Bot networksBot server :Bot\r\n".encode())
     IRCSoc.send("NICK Bot\r\n".encode())
+    IRCSoc.send("USER Bot networksBot server :Bot\r\n".encode())
+    
 
 def join():
 	IRCSoc.send("JOIN #test\r\n".encode())

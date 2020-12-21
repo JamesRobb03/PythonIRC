@@ -14,9 +14,10 @@ address = '::1' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
-channel_li = {}
 connection_li = []
 users = {}
+channel_li = {}
+connection_di={}
 
 
 #TO-DO: add try/except. error handler which drops connections
@@ -25,8 +26,8 @@ class IRC_Server:
         self.host = host
         self.port = port
 
-    def createChannels():
-        channel_dict['#test'] =[]
+    def createChannels(self):
+        channel_li['#test'] =[]
         print("Created default channel #test")        
 
     #start socket
@@ -35,6 +36,7 @@ class IRC_Server:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host,self.port))
         print("Server started!")
+        self.createChannels()
         return sock
 
     #Listen and create a new connection to the server
@@ -119,6 +121,8 @@ class ClientConnection:
                 else:
                     self.user = usernamesetuser
                     self.realname = realnamesetuser
+                    users[self.user]=[]
+                    connection_di[self.user]=self
                     self.welcomeUser()
                     #print the thin
 
@@ -132,22 +136,28 @@ class ClientConnection:
 
     def send(self, message): #for channel and private messages PRIVMSG
         return
+
     def connectToChannel(self, channel): #JOIN
-         if self.user in users and channel in channel_li:
-            if (not (channel in users[self.user])):
-                users[self.user].append(channel)
-                channel_li[channel].append(self.user)
-                print(self.user +  ' connected to ' + channel)
-                return True
+        print(str(channel))
+        print(self.user in users)
+        print(str(channel) in channel_li)
+        if self.user in users and str(channel) in channel_li:
+            print("Join 1 here")
+            if (not (str(channel) in users[self.user])):
+                users[self.user].append(str(channel))
+                channel_li[str(channel)].append(self.user)
+                print(self.user + " Has connected to the channel: " + str(channel))
+                for username in channel_li[str(channel)]:
+                    if username != self.user:
+                        connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
+                self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
+                #now print all names of users in channel
+                
+
 
             else:
-                self.message(':' + connection.gethostname() + ' 443 ' + self.user + ' ' +
-                                   channel + ' :already in channel')
-
-        return False
-    
-    except (ConnectionResetError, BrokenPipeError) as e:
-        origin.handleException(e)
+                self.message(socket.gethostname() + ' 443 ' + self.user + ' ' +
+                                   str(channel) + ' :already in channel')
         
     def disconnect(self, channel): #PART
         if self.user in users and channel in channel_li:
@@ -166,6 +176,7 @@ class ClientConnection:
         connection_li.append(self.connection)
         client_li.append(self)
 
+
     def get_client(socket): #function which returns the right connection for serviceConnections()
         for client in client_li:
             if client.connection == socket:
@@ -181,13 +192,13 @@ class ClientConnection:
             raise Exception('quit')
 
         except (ConnectionResetError, BrokenPipeError, Exception) as e:
-        origin.handleException(e)
+            self.handleException(e)
 
     def handleException(self, e):
         print(e)
         if self.user != "" and self.nickname != "" and e.__class__.__name__ != 'BrokenPipeError':
-            removeUser(self.nickname)
-            self.conn.close()
+            self.removeUser(self.nickname)
+            self.connection.close()
             print('Connection dropped by: ' + str(self.address))
 
     def message(self, message): 
@@ -225,6 +236,7 @@ class ClientConnection:
                         print("privmsg")
                     elif(irc == 'join'):
                         #run connect to channel
+                        self.connectToChannel(groups[0])
                         print("join")
                     elif(irc == 'part'):
                         #run disconnect
@@ -236,8 +248,7 @@ class ClientConnection:
                         #run ping
                         print("ping")
                     elif(irc == 'quit'):
-                        #run remove_client
-                        print("quit")
+                        self.remove_client()
                     else:
                         print("No matching command!")
 
