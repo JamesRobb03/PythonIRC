@@ -16,6 +16,7 @@ port = 6667 #default port for irc
 client_li = []
 channel_li = {}
 connection_li = []
+users = {}
 
 #Found this on a github repo for a python irc server (same assignment for this module but from last year)
 #have to reference!!!
@@ -139,13 +140,34 @@ class ClientConnection:
     def send(self, message): #for channel and private messages PRIVMSG
         return
     def connectToChannel(self, channel): #JOIN
-        if channel in channel_li.keys():
-            channel_lis[channel].append(self)
-        for i in channel_li[channel]:
-            i.send("{0} has entered {1}".format(self.nick,channel))
+         if self.user in users and channel in channel_li:
+            if (not (channel in users[self.user])):
+                users[self.user].append(channel)
+                channel_li[channel].append(self.user)
+                print(self.user +  ' connected to ' + channel)
+                return True
+
+            else:
+                self.message(':' + connection.gethostname() + ' 443 ' + self.user + ' ' +
+                                   channel + ' :already in channel')
+
+        return False
+    
+    except (ConnectionResetError, BrokenPipeError) as e:
+        origin.handleException(e)
         
     def disconnect(self, channel): #PART
-        channel_li[channel].remove(self)
+        if self.user in users and channel in channel_li:
+            if self.user in channel_li[channel] and channel in users[self.user]:
+
+                users[self.user].remove(channel)
+                channel_li[channel].remove(self.user)
+                print(self.user + ' has disconnected from ' +  channel)
+                return True
+
+        return False
+            
+
 
     def add_client(self): #to keep track of all active clients
         connection_li.append(self.connection)
