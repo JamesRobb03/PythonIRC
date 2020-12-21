@@ -159,14 +159,18 @@ class ClientConnection:
                 self.message(socket.gethostname() + ' 443 ' + self.user + ' ' +
                                    str(channel) + ' :already in channel')
         
-    def disconnect(self, channel): #PART
+    def disconnect(self, group):
+        channel = str(group[0])
+        reason = str(group[1]) #PART
         if self.user in users and channel in channel_li:
             if self.user in channel_li[channel] and channel in users[self.user]:
 
                 users[self.user].remove(channel)
                 channel_li[channel].remove(self.user)
                 print(self.user + ' has disconnected from ' +  channel)
-                connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' PART ' + str(channel))
+                for username in channel_li[channel]:
+                    if username != self.user:
+                        connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' PART ' + channel + reason)
                 return True
 
         return False
