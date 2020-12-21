@@ -89,15 +89,14 @@ class ClientConnection:
                 self.nickname = groups[0]
 
             if self.user != "" and self.nickname == "":
-                available = nicknameAvailable(nickname)
+                available = self.nicknameAvailable(self.nickname)
                 if available != 0:
                     self.nickname = ""
                     print("Connection rejected.")
                     return False
                 else:
-                    print("THE THING")
-                    #Print the thing
-            return #idk
+                    self.welcomeUser()
+
 
         except (ConnectionResetError, BrokenPipeError) as e:
                 origin.handleException(e)
@@ -107,23 +106,28 @@ class ClientConnection:
         try:
             if self.user != "":
                 return False
-        
-            self.user = groups[0]
-            self.realname = groups[3]
 
             if self.nickname != "":
-                available = usernameAvailable(user)
+                usernamesetuser = groups[0]
+                realnamesetuser = groups[3]
+                available = self.usernameAvailable(usernamesetuser)
                 if available != 0:
                     self.nickname = ""
                     print("Connection rejected.")
                     return False
                 else:
-                    print("THE THING")
-                    #print the thing
-            return #idk
+                    self.user = usernamesetuser
+                    self.realname = realnamesetuser
+                    self.welcomeUser()
+                    #print the thin
 
         except (ConnectionResetError, BrokenPipeError) as e:
             origin.handleException(e)
+
+    def welcomeUser(self):
+        self.message(socket.gethostname() + " 001 %s :Hi, welcome to Rushed IRC" % self.nickname)
+        self.message(socket.gethostname() + " 002 %s :The host is: " % self.nickname + socket.gethostname() + "Version 1" )
+        self.message(socket.gethostname() + " 003 %s :Server was created December 2020" % self.nickname)
 
     def send(self, message): #for channel and private messages PRIVMSG
         return
@@ -154,8 +158,8 @@ class ClientConnection:
         client_li.remove(self)
 
     def message(self, message): 
-        message = str(message).encode()
-        self.connection.sendall(message)
+        messageToSend = (":"+message+"\r\n").encode()
+        self.connection.sendall(messageToSend)
 
     #Need a message handling section. 
     def messageParser(self, data): #data is the data passed in from serviceconnection
@@ -204,15 +208,16 @@ class ClientConnection:
                     else:
                         print("No matching command!")
 
-    def nicknameAvailable(nickname):
+    def nicknameAvailable(self, nickname):
         for user in client_li:
             if user.nickname == nickname:
                 return 1
             return 0
 
-    def usernameAvailable(user):
+    def usernameAvailable(self, user):
         for users in client_li:
             if users.user == user:
+                print("USERNAME IN USE")
                 return 1
             return 0
 
