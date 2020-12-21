@@ -95,10 +95,47 @@ class ClientConnection:
     #need setters for attributes
     #need to add extra steps in (curretnly just base functionality)
     #   inlcuding input and all that jazz
-    def setNickname(self):#NICK
-        return
-    def setUser(self):#USER
-        return
+
+    def setNickname(self, nickname):#NICK
+        try:
+            if self.nick != "":
+                self.nickname = groups[0]
+
+            if self.user != "" and self.nickname == "":
+                available = nicknameAvailable(nickname)
+                if available != 0:
+                    self.nickname = ""
+                    print("Connection rejected.")
+                    return False
+                else
+                    #Print the thing
+            return #idk
+
+        except (ConnectionResetError, BrokenPipeError) as e:
+                origin.handleException(e)
+            
+
+    def setUser(self, groups):#USER
+        try:
+            if self.user != "":
+                return False
+        
+            self.user = groups[0]
+            self.realname = groups[3]
+
+            if self.nickname != "":
+                available = usernameAvailable(user)
+                if available != 0:
+                    self.nickname = ""
+                    print("Connection rejected.")
+                    return False
+                else
+                    #print the thing
+            return #idk
+
+        except (ConnectionResetError, BrokenPipeError) as e:
+            origin.handleException(e)
+
     def send(self, message): #for channel and private messages PRIVMSG
         return
     def connectToChannel(self, channel): #JOIN
@@ -140,11 +177,9 @@ class ClientConnection:
                 if(command):#if there is a matching irc command
                     groups=command.groups() #https://www.tutorialspoint.com/What-is-the-groups-method-in-regular-expressions-in-Python
                     if(command == 'user'):
-                        #run set user
-                        print("user")
+                        setUser()
                     elif(command == 'nick'):
-                        #run set nick
-                        print("nick")
+                        setNickname()
                     elif(command == 'privmsg'):
                         #run send
                         print("privmsg")
@@ -165,6 +200,18 @@ class ClientConnection:
                         print("quit")
                     else:
                         print("No matching command!")
+
+    def nicknameAvailable(nickname):
+        for user in client_li:
+            if user.nickname == nickname:
+                return 1
+            return 0
+
+    def usernameAvailable(user):
+        for users in client_li:
+            if users.user == user:
+                return 1
+            return 0
 
 #MAIN PROGRAM. RUNS THIS FUNCTION TO START SERVER
 def main():
