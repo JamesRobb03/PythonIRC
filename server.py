@@ -6,8 +6,9 @@
 #imports
 import socket  
 import select 
-import sys  
-
+import sys 
+import string 
+import re
 #Server Section
 address = 'localhost' #change to address of host pc
 port = 6667 #default port for irc
@@ -16,6 +17,21 @@ client_li = []
 channel_li = {}
 connection_li = []
 
+#Found this on a github repo for a python irc server (same assignment for this module but from last year)
+#have to reference!!!
+#https://github.com/CharlieHewitt/AC31008-Networks/blob/master/server.py 
+ircCommands = {}
+ircCommands['user'] = r'USER\s(.*)\s(.*)\s(.*)\s:(.*)'
+ircCommands['nick'] = r'NICK\s(.*)'
+ircCommands['privmsg'] = r'PRIVMSG\s(.*)\s:(.*)'
+ircCommands['join'] = r'JOIN\s(.*)'
+ircCommands['part'] = r'PART\s(.*) (:.*)'
+ircCommands['who'] = r'WHO\s(.*)'
+ircCommands['ping'] = r'PING\s(.*)'
+ircCommands['quit'] = r'QUIT\s(.*)'
+
+
+#TO-DO: add try/except. error handler which drops connections
 class IRC_Server:
     def __init__(self, host, port):
         self.host = host
@@ -38,32 +54,56 @@ class IRC_Server:
         #setting up selector
         server_sock.listen()
         print("Listening for connections on ", address,":",str(port))
-        #was using threading, however after reading these: https://realpython.com/python-sockets/#handling-multiple-connections 
-        #https://www.oreilly.com/library/view/python-standard-library/0596000960/ch07s03.html
+        #was using threading, however after reading these: https://realpython.com/python-sockets/#handling-multiple-connections
+        #reading on select 
         #https://stackoverflow.com/questions/20471816/how-does-the-select-function-in-the-select-module-of-python-exactly-work
         #https://www.programcreek.com/python/example/258/select.select
-        #we decided to switch to the select module.
+        #decided to switch to the select module instead (might be bad cpu performance will have to check).
         server_sock.setblocking(False)
         connection_li.append(server_sock)
         while True:
             read_ready, _, _ = select.select(connection_li, [], [], None)
+<<<<<<< HEAD
             for connection in read_ready:
                 if connection == server_socket: #If has the same socket as the server then open a new connection
+=======
+            for connection in read_ready:#loops through all active connections and processes there requests/adds new connection.
+                if connection == server_sock: #If has the same socket as the server then open a new connection
+>>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
                     #function to add a connection
+                    acceptConnection(server_sock)
                 else:
+<<<<<<< HEAD
                     #function 
 
     
+=======
+                    #function which handles servicing client connections. 
+                    serviceConnection(connection)
+
+    def acceptConnection(self, server_socket):
+        client_socket, client_address = server_socket.accept()
+        new_client = Client(client_socket, client_address)
+        new_client.add_client()
+
+    def serviceConnection(self, connectionSocket):
+        client =  ClientConnection.get_client(connectionSocket)
+        data = client.connection.recv(1024)
+        if data:
+           data = data.decode()
+           client.messageParser(data)
+>>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
 
 #Class for the client connection
 class ClientConnection:
     def __init__(self, connection, address):
-        self.connection = connection
+        self.connection = connection #the socket
         self.address = address
         self.nickname = ""
         self.user = ""
         self.realname = ""
 
+<<<<<<< HEAD
 #need setters for attributes
 #need to add extra steps in (curretnly just base functionality)
 #   inlcuding input and all that jazz
@@ -73,11 +113,24 @@ class ClientConnection:
     def receive(self):
 
     def connect(self, channel):
+=======
+    #need setters for attributes
+    #need to add extra steps in (curretnly just base functionality)
+    #   inlcuding input and all that jazz
+    def setNickname(self):#NICK
+
+    def setUser(self):#USER
+
+    def send(self, message): #for channel and private messages PRIVMSG
+
+    def connectToChannel(self, channel): #JOIN
+>>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
         if channel in channel_li.keys():
             channel_lis[channel].append(self)
         for i in channel_li[channel]:
             i.send("{0} has entered {1}".format(self.nick,channel))
         
+<<<<<<< HEAD
             
     def disconnect(self, channel):
         connection_li.remove(self.socket)
@@ -96,11 +149,60 @@ class ClientConnection:
 
     def message(self): #for channel and private messages
         self.connection.sendall(message)
+=======
+    def disconnect(self, channel): #PART
+        channel_li[channel].remove(self)
+
+    def add_client(self): #to keep track of all active clients
+        connection_li.append(self.connection)
+        client_li.append(self)
+
+    def get_client(self, socket): #function which returns the right connection for serviceConnections()
+        for client in client_li:
+            if client.connection == socket:
+                return client
+
+    def who(self): #WHO
+
+    def ping(self):#PING
+>>>>>>> 930675acaf0116d744928552a64cc46b88bf0d61
+
+    def remove_client(self): #QUIT
+        connection_li.remove(self.connection)
+        client_li.remove(self)
+
+    def message(self, message): 
+        message = str(message).encode()
+        self.connection.sendall(message)
 
     #Need a message handling section. 
-    def messageParser(self):
+    def messageParser(self, data): #data is the data passed in from serviceconnection
+        message = data.split('\r\n')
+        for m in message:
+            for irc in ircCommands:
+                command = re.search(ircCommands[irc], m) #https://docs.python.org/3/library/re.html
+                if(command):#if there is a matching irc command
+                    groups=command.groups() #https://www.tutorialspoint.com/What-is-the-groups-method-in-regular-expressions-in-Python
+                    if(command == 'user'):
+                        #run set user
+                    elif(command == 'nick'):
+                        #run set nick
+                    elif(command == 'privmsg'):
+                        #run send
+                    elif(command == 'join'):
+                        #run connect to channel
+                    elif(command == 'part'):
+                        #run disconnect
+                    elif(command == 'who'):
+                        #run who
+                    elif(command == 'ping'):
+                        #run ping
+                    elif(command == 'quit'):
+                        #run remove_client
+                    else:
+                        print("No matching command!")
 
-
+#MAIN PROGRAM. RUNS THIS FUNCTION TO START SERVER
 def main():
     server = IRC_Server(address, port)
     server_sock = server.startServer()
