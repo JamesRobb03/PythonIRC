@@ -138,11 +138,8 @@ class ClientConnection:
         return
 
     def connectToChannel(self, channel): #JOIN
-        print(str(channel))
-        print(self.user in users)
-        print(str(channel) in channel_li)
+
         if self.user in users and str(channel) in channel_li:
-            print("Join 1 here")
             if (not (str(channel) in users[self.user])):
                 users[self.user].append(str(channel))
                 channel_li[str(channel)].append(self.user)
@@ -152,12 +149,22 @@ class ClientConnection:
                         connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
                 self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
                 #now print all names of users in channel
-                
-
 
             else:
                 self.message(socket.gethostname() + ' 443 ' + self.user + ' ' +
                                    str(channel) + ' :already in channel')
+
+        elif self.user in users and str(channel) not in channel_li:
+            channel_li[str(channel)] =[]
+            print("Created new channel: ", str(channel))
+            users[self.user].append(str(channel))
+            channel_li[str(channel)].append(self.user)
+            print(self.user + " Has connected to the channel: " + str(channel))
+            for username in channel_li[str(channel)]:
+                if username != self.user:                        
+                    connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
+            self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' No topic set')
+
         
     def disconnect(self, group):
         channel = str(group[0])
@@ -203,6 +210,8 @@ class ClientConnection:
         print(e)
         if self.user != "" and self.nickname != "" and e.__class__.__name__ != 'BrokenPipeError':
             connection_li.remove(self.connection)
+            client_li.remove(self)
+
             self.connection.close()
             print('Connection dropped by: ' + str(self.address))
 
