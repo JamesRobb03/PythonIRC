@@ -103,11 +103,22 @@ class ClientConnection:
         self.nickname = nickname
         self.send(self.nickname)
 
-    def setUser(self):#USER
+    def setUser(self, groups):#USER
+        try:
+            if self.user != "":
+                return False
+        
+            self.user = groups[0]
+            self.realname = groups[3]
 
-    def setRealname(self,realname):
-        self.realname = realname
-        self.send(realname)
+            if self.nickname != "":
+                success = ##ADD USER THING
+                if success != True:
+                    self.nickname = ""
+                    print("Connection rejected.")
+                    return False
+                else
+                    #print the thing
 
     def send(self, message): #for channel and private messages PRIVMSG
 
@@ -150,7 +161,7 @@ class ClientConnection:
                 if(command):#if there is a matching irc command
                     groups=command.groups() #https://www.tutorialspoint.com/What-is-the-groups-method-in-regular-expressions-in-Python
                     if(command == 'user'):
-                        #run set user
+                        setUser()
                     elif(command == 'nick'):
                         #run set nick
                     elif(command == 'privmsg'):
