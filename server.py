@@ -166,6 +166,7 @@ class ClientConnection:
                 users[self.user].remove(channel)
                 channel_li[channel].remove(self.user)
                 print(self.user + ' has disconnected from ' +  channel)
+                connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' PART ' + str(channel))
                 return True
 
         return False
@@ -197,7 +198,7 @@ class ClientConnection:
     def handleException(self, e):
         print(e)
         if self.user != "" and self.nickname != "" and e.__class__.__name__ != 'BrokenPipeError':
-            self.removeUser(self.nickname)
+            connection_li.remove(self.connection)
             self.connection.close()
             print('Connection dropped by: ' + str(self.address))
 
@@ -205,7 +206,7 @@ class ClientConnection:
         messageToSend = (":"+message+"\r\n").encode()
         self.connection.sendall(messageToSend)
 
-    #Need a message handling section. 
+    #Need a message handling sectio4n. 
     def messageParser(self, data): #data is the data passed in from serviceconnection
         #Found this on a github repo for a python irc server (same assignment for this module but from last year)
         #have to reference!!!
