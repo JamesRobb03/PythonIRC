@@ -101,6 +101,7 @@ class ClientConnection:
             print("Username already taken")
             return 0
         self.nickname = nickname
+        self.send(self.nickname)
 
     def setUser(self):#USER
 
