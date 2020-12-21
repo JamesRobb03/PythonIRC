@@ -105,6 +105,10 @@ class ClientConnection:
 
     def setUser(self):#USER
 
+    def setRealname(self,realname):
+        self.realname = realname
+        self.send(realname)
+
     def send(self, message): #for channel and private messages PRIVMSG
 
     def connectToChannel(self, channel): #JOIN
