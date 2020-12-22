@@ -87,6 +87,7 @@ class ClientConnection:
         self.realname = ""
 
 
+    ##sets the users nickname and welcomes to server, checks if suername is unique and available
     def setNickname(self, groups):#NICK
         try:
             if self.nickname == "":
@@ -106,7 +107,7 @@ class ClientConnection:
                 origin.handleException(e)
             
 
-
+    #Sets the users username and real name, adds the connection to the connections dictionary and welcomes the user
     def setUser(self, groups):#USER
         try:
             if self.user != "":
