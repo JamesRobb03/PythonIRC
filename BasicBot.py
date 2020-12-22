@@ -62,7 +62,7 @@ def messageRespond(message):
         un = message [message.find(st)+len(st):message.find(ed)]
 
         #Below is to respond to a slap.
-        IRCSoc.send(("PRIVMSG #test :Slapped " + un + " around a bit with a large trout \r\n").encode())
+        IRCSoc.send(("PRIVMSG #test :Slapped " + un + " with a large trout \r\n").encode())
 
     #TODO Private Message Response
     elif ("PRIVMSG Bot" in message or ("PRIVMSG Bot" in message and "!" in message)):
@@ -72,7 +72,11 @@ def messageRespond(message):
 
         #respond with a fact
         res = requests.get('https://uselessfacts.jsph.pl/random.txt?language=en')
-        IRCSoc.send(("PRIVMSG " + un + " :Here is a fact! " + str(res.content) + "\r\n").encode())
+        tst = "> "
+        end = r"\n\n"
+        s = str(res.content)
+        fact = s[s.find(tst)+len(tst):s.rfind(end)]
+        IRCSoc.send(("PRIVMSG " + un + " :Here is a fact! " + fact + "\r\n").encode())
 
 
 connect()
