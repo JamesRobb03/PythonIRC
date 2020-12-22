@@ -2,6 +2,10 @@
 
 #references: https://github.com/jrosdahl/miniircd/blob/master/miniircd, https://realpython.com/python-sockets/, https://medium.com/python-pandemonium/python-socket-communication-e10b39225a4c,
 #            https://tools.ietf.org/html/rfc2813, https://python-irc.readthedocs.io/en/latest/_modules/irc/server.html, https://www.geeksforgeeks.org/simple-chat-room-using-python/
+#            https://stackoverflow.com/questions/20471816/how-does-the-select-function-in-the-select-module-of-python-exactly-work
+#            https://www.programcreek.com/python/example/258/select.select, https://realpython.com/python-sockets/#handling-multiple-connections
+
+
 
 #imports
 import socket  
@@ -21,6 +25,8 @@ connection_di={}
 
 
 #TO-DO: add try/except. error handler which drops connections
+
+#Server class or a server object
 class IRC_Server:
     def __init__(self, host, port):
         self.host = host
@@ -31,7 +37,7 @@ class IRC_Server:
         channel_li['#test'] =[]
         print("Created default channel #test")        
 
-    #start socket
+    #starts server socket
     def startServer(self):
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) #change for ipv6 to AF_INET6
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -45,28 +51,25 @@ class IRC_Server:
         #setting up selector
         server_sock.listen()
         print("Listening for connections on", address,":",str(port))
-        #was using threading, however after reading these: https://realpython.com/python-sockets/#handling-multiple-connections
-        #reading on select 
-        #https://stackoverflow.com/questions/20471816/how-does-the-select-function-in-the-select-module-of-python-exactly-work
-        #https://www.programcreek.com/python/example/258/select.select
-        #decided to switch to the select module instead (might be bad cpu performance will have to check).
         server_sock.setblocking(False)
         connection_li.append(server_sock)
         while True: #infinite loop
             read_ready, _, _ = select.select(connection_li, [], [], None)
-            for connection in read_ready:#loops through all active connections and processes there requests/adds new connection.
-                if connection == server_sock: #If has the same socket as the server then open a new connection
+            for connection in read_ready:#loops through all active connections and processes there requests/accepts new connections.
+                if connection == server_sock: 
                     #function to add a connection
                     self.acceptConnection(server_sock)
                 else:
-                    #function which handles servicing client connections. 
+                    #function which handles servicing connections. 
                     self.serviceConnection(connection)
 
+    #function to accept a connection
     def acceptConnection(self, server_socket):
         client_socket, client_address = server_socket.accept()
         new_client = ClientConnection(client_socket, client_address)
         new_client.add_client()
 
+    #function to service a connection. The part of the server that processes client sockets
     def serviceConnection(self, connectionSocket):
         client =  ClientConnection.get_client(connectionSocket)
         data = client.connection.recv(1024)
@@ -83,9 +86,6 @@ class ClientConnection:
         self.user = ""
         self.realname = ""
 
-    #need setters for attributes
-    #need to add extra steps in (curretnly just base functionality)
-    #   inlcuding input and all that jazz
 
     def setNickname(self, groups):#NICK
         try:
@@ -271,7 +271,7 @@ class ClientConnection:
             'nick': r'NICK\s(.*)',
             'privmsg': r'PRIVMSG\s(.*)\s:(.*)',
             'join': r'JOIN\s(.*)',
-            'part': r'PART\s(.*) (:.*)',
+            'part': r'PART\s(.*)\s:(.*)',
             'quit': r'QUIT\s(.*)'
         }
 
