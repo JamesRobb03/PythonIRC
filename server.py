@@ -10,7 +10,7 @@ import sys
 import string 
 import re
 #Server Section
-address = '::1' #change to address of host pc
+address = 'fc00:1337::17' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
@@ -135,8 +135,8 @@ class ClientConnection:
         self.message(socket.gethostname() + " 003 %s :Server was created December 2020" % self.nickname)
 
     def send(self, groups): #for channel and private messages PRIVMSG
-        target = str(groups[0])
-        message = str(groups[1])
+        target = groups[0]
+        message = groups[1]
         #to tell its for a channel
         messageToSend = (self.nickname+'!'+self.user+'@'+socket.gethostname()+' PRIVMSG ' + target +' '+message)
         if '#' in target:
@@ -146,27 +146,32 @@ class ClientConnection:
 
         else:
             if target in connection_di:
+                print("!!!!Sending private message!!!")
                 connection_di[target].message(messageToSend)
-
 
 
     def connectToChannel(self, channel): #JOIN
 
         if self.user in users and str(channel) in channel_li:
             if (not (str(channel) in users[self.user])):
+
                 users[self.user].append(str(channel))
                 channel_li[str(channel)].append(self.user)
+
                 print(self.user + " Has connected to the channel: " + str(channel))
+
                 connectingUser = self.user
                 connectingNick = self.nickname
-                self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
-                for username in channel_li[str(channel)]:
-                    if username != self.user:
-                        connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
-                    self.message(socket.gethostname() + ' 353 ' + username + '=' + str(channel) + ' :'+username)
-                self.message(socket.gethostname() + ' 366 ' + self.user + ' ' + str(channel) + ' :End of NAMES list')
-                
 
+                #connecting to channel
+                for username in channel_li[channel]:  
+                    connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' JOIN ' + channel) #Let other users know that this client has joined
+                self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' Testing channel for AC31008-Networks')
+
+                #listing names
+                for username2 in channel_li[channel]:    
+                    self.message(socket.gethostname() + ' 353 ' + username2 + ' = ' + str(channel) + ' :'+username2)
+                self.message(socket.gethostname() + ' 366 ' + self.nickname + ' ' + str(channel) + ' :End of NAMES list')
 
             else:
                 self.message(socket.gethostname() + ' 443 ' + self.user + ' ' +
@@ -178,9 +183,8 @@ class ClientConnection:
             users[self.user].append(str(channel))
             channel_li[str(channel)].append(self.user)
             print(self.user + " Has connected to the channel: " + str(channel))
-            for username in channel_li[str(channel)]:
-                if username != self.user:                        
-                    connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
+            for username in channel_li[str(channel)]:                     
+                connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' JOIN ' + str(channel)) #Let other users know that this client has joined
             self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' No topic set')
 
         
@@ -194,8 +198,7 @@ class ClientConnection:
                 channel_li[channel].remove(self.user)
                 print(self.user + ' has disconnected from ' +  channel)
                 for username in channel_li[channel]:
-                    if username != self.user:
-                        connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' PART ' + channel + reason)
+                    connection_di[username].message(self.nickname + '!' + self.user +'@' + socket.gethostname() + ' PART ' + channel + reason)
                 return True
 
         return False
