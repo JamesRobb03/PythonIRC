@@ -4,7 +4,7 @@ import socket
 import datetime
 import requests
 
-SERVER = "::1"
+SERVER = "fc00:1337::17"
 PORT = 6667
 CHANNEL = "#test"
 
@@ -51,7 +51,7 @@ def messageRespond(message):
         un = message [message.find(st)+len(st):message.find(ed)]
 
         #Below responds with Hello and date and time
-        IRCSoc.send(("PRIVMSG #test :Hello" + un + "My name is BasicBot \r\n").encode())
+        IRCSoc.send(("PRIVMSG #test :Hello " + un + " My name is BasicBot \r\n").encode())
         date = datetime.datetime.now()
         IRCSoc.send(("PRIVMSG #test :The time is: "+ date.strftime("%X")+"\r\n").encode())
 
@@ -70,7 +70,7 @@ def messageRespond(message):
         ed = '!'
         un = message [message.find(st)+len(st):message.find(ed)]
 
-        #respond with a fact
+        #respond with a fact from the internet!
         res = requests.get('https://uselessfacts.jsph.pl/random.txt?language=en')
         tst = "> "
         end = r"\n\n"

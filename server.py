@@ -14,7 +14,8 @@ import sys
 import string 
 import re
 #Server Section
-address = '::1' #change to address of host pc
+#IMPORTANT CHANGE ADDRESS TO THE IP OF THE HOST PC!
+address = 'fc00:1337::17' #change to address of host pc
 port = 6667 #default port for irc
 #global lists/dictionaries for easy reference.
 client_li = []
@@ -213,6 +214,10 @@ class ClientConnection:
                     for username in channel_li[channel]:                     
                         connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' JOIN ' + channel) #Let other users know that this client has joined
                     self.message(socket.gethostname() + ' 331 ' + self.nickname + ' ' + str(channel) + ' No topic set')
+                    #Showing users in the channel(RPL_NAMREPLY).
+                    for username2 in channel_li[channel]:    
+                        self.message(socket.gethostname() + ' 353 ' + username2 + ' = ' + str(channel) + ' :'+username2)
+                    self.message(socket.gethostname() + ' 366 ' + self.nickname + ' ' + str(channel) + ' :End of NAMES list')
 
         except (ConnectionResetError, BrokenPipeError) as e:
             self.handleException(e)
@@ -232,7 +237,7 @@ class ClientConnection:
                     channel_li[channel].remove(self.user)
                     print(self.user + ' has disconnected from ' +  channel)
                     for username in channel_li[channel]:
-                        connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' PART ' + channel + " :" +reason)
+                        connection_di[username].message(connectingNick + '!' + connectingUser +'@' + socket.gethostname() + ' PART ' + channel + " " +reason)
                     return True
 
             return False
@@ -261,7 +266,7 @@ class ClientConnection:
 
     def handleException(self, e):
         print(e)
-        if self.user != "" and self.nickname != "" and e.__class__.__name__ != 'BrokenPipeError':
+        if self.user != "" and self.nickname != "":
             connection_li.remove(self.connection)
             client_li.remove(self)
 
